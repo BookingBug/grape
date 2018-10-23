@@ -1,6 +1,129 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.2.0
+
+#### Changes in the Grape::API class
+
+In an effort to make APIs re-mountable, The class `Grape::API` no longer refers to an API instance,
+rather, what used to be `Grape::API` is now `Grape::API::Instance` and `Grape::API` was replaced
+with a class that can contain several instances of `Grape::API`.
+
+This changes were done in such a way that no code-changes should be required.
+However, if experiencing problems, or relying on private methods and internal behaviour too deeply, it is possible to restore the prior behaviour by replacing the references from `Grape::API` to `Grape::API::Instance`.
+
+#### Changes in rescue_from returned object
+
+Grape will now check the object returned from `rescue_from` and ensure that it is a `Rack::Response`. That makes sure response is valid and avoids exposing service information. Change any code that invoked `Rack::Response.new(...).finish` in a custom `rescue_from` block to `Rack::Response.new(...)` to comply with the validation.
+
+```ruby
+class Twitter::API < Grape::API
+  rescue_from :all do |e|
+    # version prior to 1.2.0
+    Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' }).finish
+    # 1.2.0  version
+    Rack::Response.new([ e.message ], 500, { 'Content-type' => 'text/error' })
+  end
+end
+```
+
+See [#1757](https://github.com/ruby-grape/grape/pull/1757) and [#1776](https://github.com/ruby-grape/grape/pull/1776) for more information.
+
+### Upgrading to >= 1.1.0
+
+#### Changes in HTTP Response Code for Unsupported Content Type
+
+For PUT, POST, PATCH, and DELETE requests where a non-empty body and a "Content-Type" header is supplied that is not supported by the Grape API, Grape will no longer return a 406 "Not Acceptable" HTTP status code and will instead return a 415 "Unsupported Media Type" so that the usage of HTTP status code falls more in line with the specification of [RFC 2616](https://www.ietf.org/rfc/rfc2616.txt).
+
+### Upgrading to >= 1.0.0
+
+#### Changes in XML and JSON Parsers
+
+Grape no longer uses `multi_json` or `multi_xml` by default and uses `JSON` and `ActiveSupport::XmlMini` instead. This has no visible impact on JSON processing, but the default behavior of the XML parser has changed. For example, an XML POST containing `<user>Bobby T.</user>` was parsed as `Bobby T.` with `multi_xml`, and as now parsed as `{"__content__"=>"Bobby T."}` with `XmlMini`.
+
+If you were using `MultiJson.load`, `MultiJson.dump` or `MultiXml.parse`, you can substitute those with `Grape::Json.load`, `Grape::Json.dump`, `::Grape::Xml.parse`, or directly with `JSON.load`, `JSON.dump`, `XmlMini.parse`, etc.
+
+To restore previous behavior, add `multi_json` or `multi_xml` to your `Gemfile` and `require` it.
+
+See [#1623](https://github.com/ruby-grape/grape/pull/1623) for more information.
+
+#### Changes in Parameter Class
+
+The default class for `params` has changed from `Hashie::Mash` to `ActiveSupport::HashWithIndifferentAccess` and the `hashie` dependency has been removed. This means that by default you can no longer access parameters by method name.
+
+```ruby
+class API < Grape::API
+  params do
+    optional :color, type: String
+  end
+  get do
+    params[:color] # use params[:color] instead of params.color
+  end
+end
+```
+
+To restore the behavior of prior versions, add `hashie` to your `Gemfile` and `include Grape::Extensions::Hashie::Mash::ParamBuilder` in your API.
+
+```ruby
+class API < Grape::API
+  include Grape::Extensions::Hashie::Mash::ParamBuilder
+
+  params do
+    optional :color, type: String
+  end
+  get do
+    # params.color works
+  end
+end
+```
+
+This behavior can also be overridden on individual parameter blocks using `build_with`.
+
+```ruby
+params do
+  build_with Grape::Extensions::Hash::ParamBuilder
+  optional :color, type: String
+end
+```
+
+If you're constructing your own `Grape::Request` in a middleware, you can pass different parameter handlers to create the desired `params` class with `build_params_with`.
+
+```ruby
+def request
+  Grape::Request.new(env, build_params_with: Grape::Extensions::Hashie::Mash::ParamBuilder)
+end
+```
+
+See [#1610](https://github.com/ruby-grape/grape/pull/1610) for more information.
+
+#### The `except`, `except_message`, and `proc` options of the `values` validator are deprecated.
+
+The new `except_values` validator should be used in place of the `except` and `except_message` options of
+the `values` validator.
+
+Arity one Procs may now be used directly as the `values` option to explicitly test param values.
+
+**Deprecated**
+```ruby
+params do
+  requires :a, values: { value: 0..99, except: [3] }
+  requires :b, values: { value: 0..99, except: [3], except_message: 'not allowed' }
+  requires :c, values: { except: ['admin'] }
+  requires :d, values: { proc: -> (v) { v.even? } }
+end
+```
+**New**
+```ruby
+params do
+  requires :a, values: 0..99, except_values: [3]
+  requires :b, values: 0..99, except_values: { value: [3], message: 'not allowed' }
+  requires :c, except_values: ['admin']
+  requires :d, values: -> (v) { v.even? }
+end
+```
+
+See [#1616](https://github.com/ruby-grape/grape/pull/1616) for more information.
+
 ### Upgrading to >= 0.19.1
 
 #### DELETE now defaults to status code 200 for responses with a body, or 204 otherwise

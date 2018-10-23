@@ -3132,7 +3132,7 @@ XML
     it 'sets the instance' do
       expect(subject.instance).to be_nil
       subject.compile
-      expect(subject.instance).to be_kind_of(subject)
+      expect(subject.instance).to be_kind_of(subject.base_instance)
     end
   end
 

@@ -1,3 +1,4 @@
+* [#1795](https://github.com/ruby-grape/grape/pull/1803): Adds the ability to re-mount all endpoints in any location - [@myxoh](https://github.com/bschmeck).
 ### 0.19.2 (4/12/2017)
 
 #### Features

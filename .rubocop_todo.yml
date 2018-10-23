@@ -34,8 +34,7 @@ Metrics/CyclomaticComplexity:
 # URISchemes: http, https
 Metrics/LineLength:
   Max: 215
-
-# Offense count: 56
+# Offense count: 57
 # Configuration parameters: CountComments.
 Metrics/MethodLength:
   Max: 33
@@ -44,10 +43,53 @@ Metrics/MethodLength:
 # Configuration parameters: CountComments.
 Metrics/ModuleLength:
   Max: 212
+  Exclude:
+    - 'spec/grape/dsl/routing_spec.rb'
 
 # Offense count: 16
 Metrics/PerceivedComplexity:
   Max: 14
+
+# Offense count: 4
+# Configuration parameters: ExpectMatchingDefinition, Regex, IgnoreExecutableScripts, AllowedAcronyms.
+# AllowedAcronyms: CLI, DSL, ACL, API, ASCII, CPU, CSS, DNS, EOF, GUID, HTML, HTTP, HTTPS, ID, IP, JSON, LHS, QPS, RAM, RHS, RPC, SLA, SMTP, SQL, SSH, TCP, TLS, TTL, UDP, UI, UID, UUID, URI, URL, UTF8, VM, XML, XMPP, XSRF, XSS
+Naming/FileName:
+  Exclude:
+    - 'Appraisals'
+    - 'Gemfile'
+    - 'Guardfile'
+    - 'Rakefile'
+
+# Offense count: 1
+# Configuration parameters: Blacklist.
+# Blacklist: END, (?-mix:EO[A-Z]{1})
+Naming/HeredocDelimiterNaming:
+  Exclude:
+    - 'lib/grape/router/route.rb'
+
+# Offense count: 3
+# Cop supports --auto-correct.
+# Configuration parameters: AutoCorrect.
+Performance/HashEachMethods:
+  Exclude:
+    - 'lib/grape/api/instance.rb'
+    - 'lib/grape/middleware/versioner/header.rb'
+
+# Offense count: 1
+# Cop supports --auto-correct.
+# Configuration parameters: EnforcedStyle, SupportedStyles, ProceduralMethods, FunctionalMethods, IgnoredMethods.
+# SupportedStyles: line_count_based, semantic, braces_for_chaining
+# ProceduralMethods: benchmark, bm, bmbm, create, each_with_object, measure, new, realtime, tap, with_object
+# FunctionalMethods: let, let!, subject, watch
+# IgnoredMethods: lambda, proc, it
+Style/BlockDelimiters:
+  Exclude:
+    - 'spec/grape/middleware/formatter_spec.rb'
+
+# Offense count: 1
+Style/CommentedKeyword:
+  Exclude:
+    - 'spec/grape/validations_spec.rb'
 
 # Offense count: 2
 Style/IdenticalConditionalBranches:
