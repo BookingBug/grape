@@ -1,9 +1,26 @@
 Upgrading Grape
 ===============
 
+### Upgrading to >= 1.2.1
+
+#### Obtaining the name of a mounted class
+
+In order to make obtaining the name of a mounted class simpler, we've delegated `.to_s` to `base.name`
+
+**Deprecated in 1.2.0**
+```ruby
+  payload[:endpoint].options[:for].name
+```
+**New**
+```ruby
+  payload[:endpoint].options[:for].to_s
+```
+
 ### Upgrading to >= 1.2.0
 
 #### Changes in the Grape::API class
+
+##### Patching the class
 
 In an effort to make APIs re-mountable, The class `Grape::API` no longer refers to an API instance,
 rather, what used to be `Grape::API` is now `Grape::API::Instance` and `Grape::API` was replaced
