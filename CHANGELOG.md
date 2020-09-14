@@ -1,3 +1,7 @@
+### 1.2.6
+
+* [#2102](https://github.com/ruby-grape/grape/pull/2102): Fix retaining setup blocks when remounting APIs - [@jylamont](https://github.com/jylamont).
+
 ### 1.2.5 (2019/12/01)
 
 #### Features
