@@ -99,7 +99,7 @@ module Grape
       # Replays the set up to produce an API as defined in this class, can be called
       # on classes that inherit from Grape::API
       def replay_setup_on(instance)
-        @setup.each do |setup_step|
+        @setup.dup.each do |setup_step|
           replay_step_on(instance, setup_step)
         end
       end
